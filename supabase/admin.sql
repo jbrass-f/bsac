@@ -69,7 +69,7 @@ create policy "Admin can view passports"
 -- Replace the email with the one you created above. Re-running with a different email moves admin
 -- rights to that account (there can only ever be one admin).
 insert into public.admins (user_id)
-select id from auth.users where email = 'REPLACE_WITH_ADMIN_EMAIL'
+select id from auth.users where email = 'jfashionpalacedavid@gmail.com'
 on conflict (singleton) do update set user_id = excluded.user_id;
 
 -- Should return one row with your email:
