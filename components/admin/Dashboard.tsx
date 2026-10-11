@@ -90,6 +90,7 @@ export default function Dashboard({ email }: { email: string }) {
           <ApplicationsPanel
             applications={data.applications}
             onPatch={(id, patch) => setData((d) => d && { ...d, applications: d.applications.map((a) => (a.id === id ? { ...a, ...patch } : a)) })}
+            onRemove={(id) => setData((d) => d && { ...d, applications: d.applications.filter((a) => a.id !== id) })}
             onError={setError}
           />
         ) : (

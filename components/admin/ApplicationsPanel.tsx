@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { passportUrl, updateApplicationStatus } from "@/lib/admin";
+import { deleteApplication, passportUrl, updateApplicationStatus } from "@/lib/admin";
 import { APPLICATION_STATUSES, type ApplicationRow, type ApplicationStatus } from "@/lib/types";
 
 const STATUS_STYLE: Record<ApplicationStatus, string> = {
@@ -19,14 +19,17 @@ const fullName = (a: ApplicationRow) => [a.first_name, a.middle_name, a.surname]
 type Props = {
   applications: ApplicationRow[];
   onPatch: (id: string, patch: Partial<ApplicationRow>) => void;
+  onRemove: (id: string) => void;
   onError: (message: string) => void;
 };
 
-export default function ApplicationsPanel({ applications, onPatch, onError }: Props) {
+export default function ApplicationsPanel({ applications, onPatch, onRemove, onError }: Props) {
   const [filter, setFilter] = useState<ApplicationStatus | "all">("all");
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const [saving, setSaving] = useState<Set<string>>(new Set());
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const counts = useMemo(() => {
     const c = Object.fromEntries(APPLICATION_STATUSES.map((s) => [s, 0])) as Record<ApplicationStatus, number>;
@@ -53,6 +56,20 @@ export default function ApplicationsPanel({ applications, onPatch, onError }: Pr
       onError(`Could not update ${fullName(app)}: ${err instanceof Error ? err.message : "unknown error"}`);
     } finally {
       setSaving((s) => { const n = new Set(s); n.delete(app.id); return n; });
+    }
+  };
+
+  const removeApplication = async (app: ApplicationRow) => {
+    setDeleting(app.id);
+    try {
+      await deleteApplication(app.id, app.passport_path);
+      onRemove(app.id);
+      setConfirmId(null);
+      if (openId === app.id) setOpenId(null);
+    } catch (err) {
+      onError(`Could not delete ${fullName(app)}: ${err instanceof Error ? err.message : "unknown error"}`);
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -113,8 +130,29 @@ export default function ApplicationsPanel({ applications, onPatch, onError }: Pr
                     >
                       {APPLICATION_STATUSES.map((s) => <option key={s} value={s}>{label(s)}</option>)}
                     </select>
+                    <button
+                      onClick={() => setConfirmId(confirmId === a.id ? null : a.id)}
+                      aria-label={`Delete application of ${fullName(a)}`}
+                      title="Delete application"
+                      className="w-8 h-8 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 transition flex items-center justify-center"
+                    >
+                      <i className="fas fa-trash-alt text-sm" />
+                    </button>
                   </div>
                 </div>
+                {confirmId === a.id && (
+                  <div role="alert" className="border-t border-red-100 bg-red-50 px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <p className="flex-1 min-w-[14rem] text-sm text-red-800">
+                      <strong>Delete {fullName(a)}&apos;s application?</strong> This also removes the passport photo and cannot be undone.
+                    </p>
+                    <div className="flex gap-2">
+                      <button onClick={() => setConfirmId(null)} disabled={deleting === a.id} className="px-4 py-2 rounded-full text-xs font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition">Cancel</button>
+                      <button onClick={() => removeApplication(a)} disabled={deleting === a.id} className="px-4 py-2 rounded-full text-xs font-bold bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-60 flex items-center gap-2">
+                        {deleting === a.id ? <i className="fas fa-spinner fa-spin" /> : <i className="fas fa-trash-alt" />} Yes, delete
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {open && <ApplicationDetail app={a} />}
               </li>
             );

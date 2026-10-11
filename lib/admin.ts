@@ -40,6 +40,22 @@ export async function updateApplicationStatus(id: string, status: ApplicationSta
   assertUpdated(data);
 }
 
+/**
+ * Permanently deletes an application and its passport photo.
+ * Needs supabase/delete-applications.sql to have been run once (it only ADDS delete permission for the admin).
+ */
+export async function deleteApplication(id: string, passportPath: string) {
+  const supabase = getSupabase();
+  const { data, error } = await supabase.from("applications").delete().eq("id", id).select("id");
+  if (error) throw error;
+  if (!data?.length) {
+    throw new Error("The application was not deleted (delete permission missing — run supabase/delete-applications.sql — or it was already removed).");
+  }
+  // The record is gone; removing the photo is best-effort so a storage hiccup never blocks the admin.
+  const { error: storageError } = await supabase.storage.from("passports").remove([passportPath]);
+  if (storageError) console.warn("Application deleted, but its passport photo could not be removed:", storageError.message);
+}
+
 export async function fetchMessages() {
   const { data, error } = await getSupabase()
     .from("messages")

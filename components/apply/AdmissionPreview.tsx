@@ -10,13 +10,14 @@ type Props = { student: AdmittedStudent; onRestart: () => void };
 const NOTE = "As a faith based institute, our students are expected to conduct themselves in a manner that is pleasing unto the Lord.";
 
 export default function AdmissionPreview({ student, onRestart }: Props) {
-  const formRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+  // Show the success message first; the Print / Restart buttons stay pinned on screen below.
   useEffect(() => {
-    formRef.current?.scrollIntoView({ behavior: "smooth" });
+    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
   return (
-    <div className="mt-6">
+    <div ref={topRef} className="mt-6 scroll-mt-24">
       <div className="text-center mb-8 no-print flex flex-wrap justify-center gap-4 bg-white p-6 rounded-2xl shadow-lg border border-emerald-100">
         <div className="w-full mb-2">
           <i className="fas fa-check-circle text-4xl text-emerald-500 mb-2" />
@@ -30,15 +31,9 @@ export default function AdmissionPreview({ student, onRestart }: Props) {
             <p className="mt-1">Keep one copy for your records and submit the other copy to the BSAC centre at EYN Church Utako, Abuja.</p>
           </div>
         </div>
-        <button onClick={() => window.print()} className="bg-brand text-white px-6 py-3 rounded-full font-bold shadow-md hover:bg-brand-dark transition flex items-center gap-2">
-          <i className="fas fa-print" /> Print / Download Form (A4)
-        </button>
-        <button onClick={onRestart} className="bg-gray-800 text-white px-6 py-3 rounded-full font-bold shadow-md hover:bg-gray-900 transition flex items-center gap-2">
-          <i className="fas fa-redo" /> Restart Application
-        </button>
       </div>
 
-      <div ref={formRef} id="admission-form" className="bg-white p-8 md:p-12 rounded-2xl shadow-2xl border border-gray-200 text-black max-w-[210mm] mx-auto">
+      <div id="admission-form" className="bg-white p-8 md:p-12 rounded-2xl shadow-2xl border border-gray-200 text-black max-w-[210mm] mx-auto">
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-center gap-4">
             <Image src="/logo.png" alt="BSAC Logo" width={80} height={80} className="w-20 h-20 rounded-full object-cover border border-gray-200 shrink-0" />
@@ -91,6 +86,16 @@ export default function AdmissionPreview({ student, onRestart }: Props) {
             <span className="bg-black text-white text-xs px-4 py-1 font-bold uppercase tracking-widest rounded-full">Motto: {MOTTO}</span>
           </div>
         </div>
+      </div>
+
+      {/* Pinned just above the bottom navigation so Print / Restart never need scrolling to. */}
+      <div className="no-print sticky bottom-20 z-20 mt-6 flex gap-3 rounded-2xl bg-white/95 p-3 shadow-lg border border-gray-200 backdrop-blur max-w-[210mm] mx-auto">
+        <button onClick={() => window.print()} className="flex-1 bg-brand text-white px-4 py-3 rounded-full font-bold text-sm shadow-md hover:bg-brand-dark transition flex items-center justify-center gap-2">
+          <i className="fas fa-print" /> <span>Print / Download<span className="hidden sm:inline"> Form (A4)</span></span>
+        </button>
+        <button onClick={onRestart} className="flex-none bg-gray-800 text-white px-4 py-3 rounded-full font-bold text-sm shadow-md hover:bg-gray-900 transition flex items-center justify-center gap-2">
+          <i className="fas fa-redo" /> Restart
+        </button>
       </div>
     </div>
   );

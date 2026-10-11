@@ -34,9 +34,10 @@ export default function PaymentModal({ form, onPrint, onBack }: Props) {
   );
 
   return (
-    <div className="fixed inset-0 z-[99999] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 no-print overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl my-8 border border-amber-200">
-        <div className="text-center mb-6">
+    <div className="fixed inset-0 z-[99999] bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 no-print">
+      <div className="bg-white rounded-3xl max-w-lg w-full max-h-[calc(100dvh-1.5rem)] flex flex-col shadow-2xl border border-amber-200 overflow-hidden">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-5 md:p-8">
+        <div className="text-center mb-5">
           <div className="w-16 h-16 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-3"><i className="fas fa-wallet text-3xl" /></div>
           <h3 className="text-2xl font-extrabold text-brand">Do you wish to Pay Now?</h3>
           <p className="text-xs text-gray-500 mt-1">kindly copy the account details below, make your payment and proceed to class.</p>
@@ -58,7 +59,7 @@ export default function PaymentModal({ form, onPrint, onBack }: Props) {
             <span className="text-xs font-bold text-gray-800 leading-snug block mt-0.5">{PAYMENT.accountName} <br /> {PAYMENT.bank}</span>
           </div>
         </div>
-        <div className="space-y-3 mb-6">
+        <div className="space-y-3 mb-5">
           <p className="text-xs font-bold text-gray-700 text-center">Share your proof of payment via:</p>
           <div className="grid grid-cols-2 gap-3">
             <a href={`https://wa.me/${CONTACT.whatsapp}?text=${whatsappText}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-emerald-600 text-white p-3 rounded-xl font-bold text-xs hover:bg-emerald-700 transition shadow-sm">
@@ -69,10 +70,12 @@ export default function PaymentModal({ form, onPrint, onBack }: Props) {
             </a>
           </div>
         </div>
-        <p className="text-xs text-center text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-3 mb-3">
+        <p className="text-xs text-center text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-3">
           <i className="fas fa-print mr-1" /> Print your admission form, <strong>keep a copy</strong> for yourself and <strong>submit one copy to the centre</strong>.
         </p>
-        <div className="space-y-2">
+        </div>
+        {/* Buttons stay pinned at the bottom of the modal; only the details above scroll. */}
+        <div className="shrink-0 border-t border-gray-100 bg-white p-4 md:px-8 space-y-2">
           <button onClick={onPrint} className="w-full bg-brand text-white py-3.5 rounded-full font-bold hover:bg-brand-dark transition shadow-lg text-sm">PRINT FORM</button>
           <button onClick={onBack} className="w-full bg-gray-100 text-gray-600 py-2.5 rounded-full font-semibold hover:bg-gray-200 transition text-xs">Back to Editing Form</button>
         </div>
